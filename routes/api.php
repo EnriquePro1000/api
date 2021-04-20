@@ -17,3 +17,17 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+/*
+Route:group([
+    'middleware' => 'api',
+    'prefix' => 'auth'
+], function($router){
+    Route::get('users', 'Seguridad/logincontroller@users');
+    
+});
+*/
+
+Route::post('login', [App\Http\Controllers\Seguridad\LoginController::class, 'login']);
+Route::get('users', [App\Http\Controllers\Seguridad\LoginController::class, 'users']);
+Route::post('register', [App\Http\Controllers\Seguridad\RegisterController::class, 'register']);
