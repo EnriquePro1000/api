@@ -29,5 +29,7 @@ Route:group([
 */
 
 Route::post('login', [App\Http\Controllers\Seguridad\LoginController::class, 'login']);
+Route::get('refresh', [App\Http\Controllers\Seguridad\LoginController::class, 'refresh']);
+Route::get('logout', [App\Http\Controllers\Seguridad\LoginController::class, 'logout']);
 Route::get('users', [App\Http\Controllers\Seguridad\LoginController::class, 'users']);
 Route::post('register', [App\Http\Controllers\Seguridad\RegisterController::class, 'register']);

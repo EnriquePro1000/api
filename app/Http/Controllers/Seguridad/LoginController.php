@@ -2,52 +2,66 @@
 
 namespace App\Http\Controllers\Seguridad;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+//use Illuminate\Support\Facades\Auth;
+//use Symfony\Component\HttpFoundation\Response;
 use App\Http\Controllers\Controller;
-use Symfony\Component\HttpFoundation\Response;
 use App\Models\User;
-//use Session;
-
 
 class LoginController extends Controller
 {
-    public function __construct() {
-        $this->middleware('auth:api', ['except' => ['unauthorized','login']]);
-        $this->guard = "api";
+
+    public function login(Request $request){
+        /*
+         * Comprueba si el email enviado existe
+         */
+        $err_1 = User::where("email",$request->email)->count();
+        if($err_1 < 1){
+            return response()->json([
+                'status' => "err_1",
+                'result' => "El correo no existe"
+                ]);
+        }
+
+        $credencials = $request->only("email","password");
+        /*
+         * Comprueba si el pass coincide
+         */
+        if(! $token = auth($this->guard)->attempt($credencials)){
+        return response()->json([
+            'status' => "err_2",
+            'result' => "password incorrecto"
+        ]);
     }
     
-    public function unauthorized(){
-        return response()->json(Response::HTTP_UNAUTHORIZED);
-    }    
+    /*
+     * Encapsula el access_token en una variable
+     */
+    $api_token =  collect(json_decode($this->respondWithToken($token)
+            ->content()))->unique('access_token');
     
-    public function login(Request $request) {
-       
-    $credencials = $request->only("email","password");
-    if(! $token = auth($this->guard)->attempt($credencials)){
-        return response()->json(['error' => 'Unauthorized'],401);
-        //return response()->json($data,200,[]);
+    /*
+     * Almacena el token del usuario en la bbdd
+     */
+    $user = User::findOrFail(auth($this->guard)->id());
+    $upd["api_token"] = $api_token["access_token"];
+    $user->update($upd);
+     
+    /*
+     * Envia el usuario con el nuevo token al front
+     */
+     $upd_user = User::findOrFail(auth($this->guard)->id());
+     return response()->json([
+         'status' => "ok",
+         'result' => $upd_user
+             ]);
     }
-    $token = $this->respondWithToken($token);
-    //$user = response()->json(auth($this->guard)->user());
-    //return response()->json(['token' => $token, 'user' => $user],200);
-    return $this->respondWithToken($token);  
-    }
-    
-    public function me(){
-        return response()->json(auth($this->guard)->user());
-        
-    }
-    
+
     public function logout(){
         auth($this->guard)->logout();
-        return response()->json(['message' => 'Successfully loged out']);
-    }
-    
-    
-    
-    public function refresh(){
-        auth($this->guard)->logout();
-        return $this->RespondWithToken(auth($this->guard)->refresh());
+        return response()->json([
+            'status' => "ok",
+            'result' => 'Successfully loged out'
+            ]);
     }
     
     protected function RespondWithToken($token){
@@ -58,8 +72,64 @@ class LoginController extends Controller
         ]);
     }
     
+      public function users() { 
+            $usuario = User::all();
+           return response()->json([
+         'status' => "ok",
+         'result' => $usuario
+             ]);
+        
+      
     
+    }
+}
 
+    /*  
+    public function unauthorized(){
+         return response()->json([
+            'status' => "error",
+            'result' => "usuario no autorizado"
+        ]);
+    }
+   */
+    
+    /*
+    public function me(){
+        return response()->json(auth($this->guard)->user());
+        
+    }
+    */
+    
+    /*
+    public function refresh(){
+        auth($this->guard)->logout();
+        $this->RespondWithToken(auth($this->guard)->refresh());
+        $api_token =  collect(json_decode($this->RespondWithToken(auth($this->guard)->refresh())->content()))->unique('access_token');
+     $user = User::findOrFail(auth($this->guard)->id());
+     $upd["api_token"] = $api_token["access_token"];
+     $user->update($upd);
+     
+     $ultuser = User::findOrFail(auth($this->guard)->id());
+     
+        return response()->json([
+            'status' => "ok",
+            'result' => $ultuser
+        ]);
+        
+    }
+    */
+    
+    /*
+    protected function RespondWithToken($token){
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth($this->guard)->factory()->getTTL()*60
+        ]);
+    }
+    */
+    
+/*
     public function users() {      
         
         $usuario = User::all();
@@ -68,5 +138,5 @@ class LoginController extends Controller
   
     
     }
-   
-}
+   */
+
