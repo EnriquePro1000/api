@@ -33,3 +33,5 @@ Route::get('refresh', [App\Http\Controllers\Seguridad\LoginController::class, 'r
 Route::get('logout', [App\Http\Controllers\Seguridad\LoginController::class, 'logout']);
 Route::get('users', [App\Http\Controllers\Seguridad\LoginController::class, 'users']);
 Route::post('register', [App\Http\Controllers\Seguridad\RegisterController::class, 'register']);
+Route::post('modifySaldo', [App\Http\Controllers\Seguridad\ModificarSaldoController::class, 'modificarSaldo']);
+Route::post('registerClient', [App\Http\Controllers\Seguridad\RegistrarClienteController::class, 'register']);

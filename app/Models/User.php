@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -19,8 +18,9 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $fillable = [
         'tipide_id',
-        'admin',
-        'cedula',
+        'level',
+        'cupo',
+        'identidad',
         'name1',
         'name2',
         'lastname1',
